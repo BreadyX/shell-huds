@@ -1,3 +1,21 @@
+# shell-huds
+This repo contains some shell/python3 scripts that can be used in a shell prompt
+to display quick information.
+
+## Installation
+### Requirements:
+- meson
+- git
+- python3
+- fontawesome (see each hud for more info)
+
+### How to install
+In the root directory of the repository run:
+```sh
+meson build
+ninja -C ./build install
+```
+
 # git-hud
 Small python script that formats a quick summary about the current git repository
 and prints it to standard output.
@@ -20,17 +38,7 @@ If the environment variable GIT_HUD_GLYPH is set, the script will use unicode
 glyphs. The variable is, however, ignored if a tty is used.
 ```
 
-## Dependencies
-- meson
-- python3
-- git
-- fontawesome (if used with `GIT_HUD_GLYPH`)
-
-## Use and Features
-Designed to be used inside a prompt (like a shell prompt). It shows only essential
-information in a very short and compact format
-
-Information shown:
+## Information shown
 - branch
 - short hash of latest commit
 - number of commit ahead or behind remote (if present)
@@ -65,16 +73,7 @@ If the environment variable BAT_HUD_GLYPH is set, the script will use unicode
 glyphs. The variable is, however, ignored if a tty is used.
 ```
 
-## Dependencies
-- meson
-- python3
-- fontawesome (if used with `BAT_HUD_GLYPH`)
-
-## Use and Features
-Designed to be used inside a prompt (like a shell prompt). It shows only essential
-information in a very short and compact format
-
-Information shown:
+## Information shown
 - Charge percent
 - Battery status (charging or discharging)
 
