@@ -3,8 +3,8 @@
 CACHE=~/.cache/corona
 
 if { ! [ -f "$CACHE" ] ; } ||
-		[ $1 == '-f' ] ||
-		[ "$(stat -c'%y' $CACHE | cut -d' ' -f1)" == "date +%F" ]; then
+		[ "$1" = '-f' ] ||
+		[ "$(stat -c'%y' $CACHE | cut -d' ' -f1)" != "$(date +%F)" ]; then
 	curl -s "https://corona-stats.online/Italy?minimal=true" > $CACHE
 fi
 
