@@ -1,0 +1,13 @@
+#! /bin/sh
+
+CACHE=~/.cache/corona
+
+if { ! [ -f "$CACHE" ] ; } ||
+		[ $1 == '-f' ] ||
+		[ "$(stat -c'%y' $CACHE | cut -d' ' -f1)" == "date +%F" ]; then
+	curl -s "https://corona-stats.online/Italy?minimal=true" > $CACHE
+fi
+
+sed -n 2p "$CACHE" |
+	sed -E "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g ; s/\s+/;/g" |
+	awk -F';' '{ print "🦠: 😷" $3 " 💀" $5 " ❤️ " $4; }'
