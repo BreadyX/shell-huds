@@ -1,5 +1,5 @@
 project('shell-huds',
-		version: '1.0.0')
+		version: '1.1.0')
 
 python = import('python')
 python_install = python.find_installation('python3')
