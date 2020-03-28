@@ -1,0 +1,59 @@
+#! /bin/sh -e
+NAME="corona"
+VERSION="@version@"
+API_URL="https://corona-stats.online"
+
+UPDATE=
+CACHE=~/.cache/corona
+COUNTRY=
+DOC="$NAME [options] [--] country
+Print short summary about current corona virus situation (Info from
+$API_URL).
+
+Options:
+    -c, --cache=cache  Use this file as cache
+    -u, --update       Force update cache file
+    -h, --help         Print this dialog
+    -v, --version      Print info about version
+
+Unicode support is required. Cache is updated every day.
+Default cache location is $CACHE."
+VERSION_DIALOG="$NAME version $VERSION
+Written by BreadyX, contacts:
+    GitHub repo:  @repo_url@"
+
+ARGS="$(getopt -u -n "$NAME" -o "hvuc:" -l "help,version,update,cache:" -- "$@")"
+set -- $ARGS
+while true; do
+	case $1 in
+		-h|--help)
+			printf "%s\n" "$DOC"
+			exit 0 ;;
+		-v|--version)
+			printf "%s\n" "$VERSION_DIALOG"
+			exit 0 ;;
+		-u|--update)
+			UPDATE="yes"
+			shift ;;
+		-c|--cache)
+			CACHE=$1
+			shift 2 ;;
+		--)
+			shift
+			break ;;
+	esac
+done
+COUNTRY="$1"
+
+[ -z "$COUNTRY" ] && exit 1
+
+if [ -n "$UPDATE" ] ||
+	[ "$(stat -c'%y' "$CACHE" 2>/dev/null | cut -d' ' -f1)" != "$(date +%F)" ]; then
+	curl -s "$API_URL" > "$CACHE"
+fi
+
+if [ -z "$UPDATE" ]; then
+	grep "$COUNTRY" "$CACHE" |
+		sed -E "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g ; s/│/;/g; s/║//g; s/\s+//g" |
+		awk -F';' '{ print "🦠: 😷" $3 " 💀" $5 " ❤️ " $7; }'
+fi
