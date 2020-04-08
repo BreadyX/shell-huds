@@ -40,10 +40,8 @@ def main():
     if not os.path.isdir('/sys/class/power_supply/BAT0'):
         return
 
-    energy_full = get_energy_full()
-    energy_now = get_energy_now()
+    bat_percent = get_capacity()
     status = get_status()
-    bat_percent = math.floor((energy_now / energy_full) * 100)
     if status == 'Charging':
         print(f'{BATTERY_CHARGING_GLYPH} {bat_percent}%')
     else:
@@ -66,18 +64,10 @@ def setup_args():
                         help=VERSION_HELP)
     return parser.parse_args()
 
-def get_energy_full():
-    """Get energy_full from sysfs"""
+def get_capacity():
+    """Get capacity from sysfs"""
     try:
-        with open('/sys/class/power_supply/BAT0/energy_full') as file:
-            return int(file.read().strip())
-    except FileNotFoundError:
-        return 0
-
-def get_energy_now():
-    """Get energy_now from sysfs"""
-    try:
-        with open('/sys/class/power_supply/BAT0/energy_now') as file:
+        with open('/sys/class/power_supply/BAT0/capacity') as file:
             return int(file.read().strip())
     except FileNotFoundError:
         return 0
