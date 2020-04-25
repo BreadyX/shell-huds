@@ -73,13 +73,14 @@ def construct_prompt(root_dir):
     ahead, behind = get_ahead_behind(repo_info)
     latest_commit = get_latest_commit()
     unstaged = get_unstaged(repo_info)
+    staged = get_staged(repo_info)
     untracked = get_untracked(repo_info)
     unmerged = get_unmerged(repo_info)
     stashed = get_stashed(root_dir)
 
     prompt = (f'{BRANCH_GLYPH} {branch} ({latest_commit});'
               f' {AHEAD_GLYPH}{ahead} {BEHIND_GLYPH}{behind};'
-              f' ({unstaged}{untracked}{unmerged}{stashed})')
+              f' ({staged}{unstaged}{untracked}{unmerged}{stashed})')
     return prompt
 
 def get_repo_info():
@@ -131,11 +132,19 @@ def get_latest_commit():
         return '???'
 
 def get_unstaged(repo_info):
-    """Extract from repo_info using regex if there are unstaged files and
+    """Extract from repo_info using regex if there are unstaged changes and
     return corresponding glyph"""
-    unstaged = re.findall(r'(?m)^ *[DMAR]', repo_info)
+    unstaged = re.findall(r'(?m)^.[DMARC]', repo_info)
     if unstaged:
         return '*'
+    return ''
+
+def get_staged(repo_info):
+    """Extract from repo_info using regex if there are staged changes and
+    return corresponding glyph"""
+    unstaged = re.findall(r'(?m)^[DMARC].', repo_info)
+    if unstaged:
+        return '+'
     return ''
 
 def get_untracked(repo_info):
@@ -149,7 +158,7 @@ def get_untracked(repo_info):
 def get_unmerged(repo_info):
     """Extract from repo_info using regex if there are merge conflicts and
     return corresponding glyph"""
-    unmerged = re.findall('(?m)^U+[DMAR]*', repo_info)
+    unmerged = re.findall(r'(?m)^[DAU]{2}', repo_info)
     if unmerged:
         return '!'
     return ''
