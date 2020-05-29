@@ -1,0 +1,2 @@
+option('git_hud', type : 'feature', value : 'enabled', description : 'Install git-hud')
+option('bat_hud', type : 'feature', value : 'disabled', description : 'Install bat-hud')

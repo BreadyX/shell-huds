@@ -3,7 +3,6 @@
 
 import sys
 import os
-import math
 import argparse
 
 NAME = "bat-hud"
@@ -33,28 +32,37 @@ else:
 def main():
     """Main func"""
     args = setup_args()
+    i = 0
+    prefix = '/sys/class/BAT{i}/'
+
     if args.version is True:
         print(VERSION_DIALOG.format(NAME, VERSION))
         sys.exit()
 
-    if not os.path.isdir('/sys/class/power_supply/BAT0'):
-        return
-
-    bat_percent = get_capacity()
-    status = get_status()
-    if status == 'Charging':
-        print(f'{BATTERY_CHARGING_GLYPH} {bat_percent}%')
-    else:
-        if bat_percent >= 75:
-            print(f'{BATTERY_FULL_GLYPH}  {bat_percent}%')
-        elif bat_percent >= 50:
-            print(f'{BATTERY_34_GLYPH}  {bat_percent}%')
-        elif bat_percent >= 15:
-            print(f'{BATTERY_HALF_GLYPH}  {bat_percent}%')
-        elif bat_percent >= 3:
-            print(f'{BATTERY_14_GLYPH}  {bat_percent}%')
+    while os.path.isdir(prefix):
+        bat_percent = get_capacity(prefix)
+        status = get_status(prefix)
+        if status == 'Charging':
+            print(f'{BATTERY_CHARGING_GLYPH} {bat_percent}%')
+        elif status == 'NA':
+            print(f'? {bat_percent}%')
         else:
-            print(f'{BATTERY_LOW_GLYPH}  {bat_percent}%')
+            if bat_percent >= 75:
+                print(f'{BATTERY_FULL_GLYPH}  {bat_percent}%')
+            elif bat_percent >= 50:
+                print(f'{BATTERY_34_GLYPH}  {bat_percent}%')
+            elif bat_percent >= 15:
+                print(f'{BATTERY_HALF_GLYPH}  {bat_percent}%')
+            elif bat_percent >= 3:
+                print(f'{BATTERY_14_GLYPH}  {bat_percent}%')
+            else:
+                print(f'{BATTERY_LOW_GLYPH}  {bat_percent}%')
+        print(';')
+        i += 1
+        prefix = '/sys/class/BAT{i}/'
+
+    if i == 0:
+        sys.exit(1)
 
 def setup_args():
     """Return namespace with parsed args"""
@@ -64,21 +72,21 @@ def setup_args():
                         help=VERSION_HELP)
     return parser.parse_args()
 
-def get_capacity():
+def get_capacity(prefix):
     """Get capacity from sysfs"""
     try:
-        with open('/sys/class/power_supply/BAT0/capacity') as file:
+        with open(os.path.join(prefix, 'capacity')) as file:
             return int(file.read().strip())
     except FileNotFoundError:
         return 0
 
-def get_status():
+def get_status(prefix):
     """Get status from sysfs"""
     try:
-        with open('/sys/class/power_supply/BAT0/status') as file:
+        with open(os.path.join(prefix, 'status')) as file:
             return file.read().strip()
     except FileNotFoundError:
-        return "N.A."
+        return "NA"
 
 if __name__ == '__main__':
     try:

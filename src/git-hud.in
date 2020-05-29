@@ -18,6 +18,11 @@ EPILOG = ("If the environment variable GIT_HUD_GLYPH is set, the script will "
 VERSION_DIALOG = ("{} version {}\n"
                   "Written by BreadyX, contacts:\n"
                   "\tGitHub repo: @repo_url@")
+
+NO_BRANCH_HELP = "do not show branch name"
+NO_COMMIT_HELP = "do not show last commit's short hash"
+NO_DISTANCE_HELP = "do not show if local branch is ahead or behind remote"
+NO_MOD_HELP = "do not show if there are uncomitted changes to the tree"
 VERSION_HELP = "show info about version"
 
 if ('GIT_HUD_GLYPH' in os.environ) and (not os.environ['TERM'] == 'linux'):
@@ -41,7 +46,8 @@ def main():
     git_dir = get_root_dir()
     if git_dir is None:
         sys.exit()
-    prompt = construct_prompt(git_dir)
+    prompt = construct_prompt(git_dir, args.no_branch, args.no_commit,
+                              args.no_distance, args.no_mod)
     print(prompt)
     sys.exit()
 
@@ -49,6 +55,13 @@ def setup_args():
     """Return namespace with parsed args"""
     parser = argparse.ArgumentParser(prog=NAME, description=DESCRIPTION,
                                      epilog=EPILOG)
+    parser.add_argument('-B', '--no_branch', action='store_true',
+                        help=NO_BRANCH_HELP)
+    parser.add_argument('-C', '--no_commit', action='store_true',
+                        help=NO_COMMIT_HELP)
+    parser.add_argument('-D', '--no_distance', action='store_true',
+                        help=NO_DISTANCE_HELP)
+    parser.add_argument('-M', '--no_mod', action='store_true', help=NO_MOD_HELP)
     parser.add_argument('-v', '--version', action='store_true',
                         help=VERSION_HELP)
     return parser.parse_args()
@@ -63,24 +76,29 @@ def get_root_dir():
     except subprocess.CalledProcessError:
         return None
 
-def construct_prompt(root_dir):
+def construct_prompt(root_dir, no_branch, no_commit, no_distance, no_mod):
     """Format prompt"""
+    prompt = ""
     repo_info = get_repo_info()
-    if repo_info is None:
-        return ""
-
-    branch = get_branch(repo_info)
-    ahead, behind = get_ahead_behind(repo_info)
-    latest_commit = get_latest_commit()
-    unstaged = get_unstaged(repo_info)
-    staged = get_staged(repo_info)
-    untracked = get_untracked(repo_info)
-    unmerged = get_unmerged(repo_info)
-    stashed = get_stashed(root_dir)
-
-    prompt = (f'{BRANCH_GLYPH} {branch} ({latest_commit});'
-              f' {AHEAD_GLYPH}{ahead} {BEHIND_GLYPH}{behind};'
-              f' ({staged}{unstaged}{untracked}{unmerged}{stashed})')
+    if repo_info is not None:
+        if not no_branch:
+            prompt += f'{BRANCH_GLYPH} {get_branch(repo_info)} '
+        if not no_commit:
+            prompt += f'({get_latest_commit()}) '
+        if not no_distance:
+            ahead, behind = get_ahead_behind(repo_info)
+            if ahead == 0 and behind == 0:
+                prompt += f'{AHEAD_GLYPH}{BEHIND_GLYPH} '
+            else:
+                prompt += f'{AHEAD_GLYPH}{ahead} {BEHIND_GLYPH}{behind} '
+        if not no_mod:
+            mods = f'[{get_staged(repo_info)}'
+            mods += f'{get_unstaged(repo_info)}'
+            mods += f'{get_untracked(repo_info)}'
+            mods += f'{get_unmerged(repo_info)}'
+            mods += f'{get_stashed(root_dir)}]'
+            if mods != '[]':
+                prompt += mods
     return prompt
 
 def get_repo_info():
