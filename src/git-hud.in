@@ -96,7 +96,7 @@ def construct_prompt(root_dir, no_branch, no_commit, no_distance, no_mod):
             mods += f'{get_unstaged(repo_info)}'
             mods += f'{get_untracked(repo_info)}'
             mods += f'{get_unmerged(repo_info)}'
-            mods += f'{get_stashed(root_dir)}]'
+            mods += f'{get_stashed(root_dir)}] '
             if mods != '[]':
                 prompt += mods
     return prompt
