@@ -40,6 +40,8 @@ def main():
         sys.exit()
 
     while os.path.isdir(prefix):
+        if i != 0:
+            print(';')
         bat_percent = get_capacity(prefix)
         status = get_status(prefix)
         if status == 'Charging':
@@ -57,7 +59,6 @@ def main():
                 print(f'{BATTERY_14_GLYPH}  {bat_percent}%')
             else:
                 print(f'{BATTERY_LOW_GLYPH}  {bat_percent}%')
-        print(';')
         i += 1
         prefix = '/sys/class/BAT{i}/'
 
