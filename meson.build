@@ -1,5 +1,5 @@
 project('shell-huds',
-		version: '1.4.3')
+		version: '1.4.4')
 
 repo_url = 'https://github.com/BreadyX/shell-huds.git'
 
